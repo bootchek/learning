@@ -3,6 +3,7 @@ import ssl
 import requests
 from bs4 import BeautifulSoup
 import time
+import sys
 
 def readhtml_bad(url, output_filename):
     # Ignore SSL certificate errors
@@ -11,30 +12,33 @@ def readhtml_bad(url, output_filename):
     ctx.verify_mode = ssl.CERT_NONE
 
     html = urllib.request.urlopen(url, context=ctx).read()
-    fhand = open(output_filename+'.html', 'wb')
+    fhand = open(output_filename + '.html', 'wb')
     fhand.write(html)
     fhand.close()
 
 
 def readhtml_good(url):
     return requests.get(url).text
-    # with open(output_filename+'.html', 'w') as output_file:
-    #     output_file.write(r.text)
 
 
-def getCurrency(html, currency_string):
+def get_currency(html, currency_code):
     soup = BeautifulSoup(html, 'html.parser')
     divs = soup.find_all('div')
-    for tag in divs:
-        if 'class' in tag.attrs:
-            if tag['class'] == ["table-wrapper"]:
-                for currency in tag.find_all('tr'):
-                    if currency.contents[3].string == currency_string:
-                        return currency.contents[9].string
+    for div in divs:
+        if 'class' in div.attrs:
+            if div['class'] == ["table-wrapper"]:
+                for currency in div.find_all('tr'):
+                    if currency.contents[3].string == currency_code:
+                        order = int(currency.contents[5].string)
+                        price = float(currency.contents[9].string.replace(",", "."))
+                        return price/order
+
 
 url = 'https://www.cbr.ru/currency_base/daily/'
 while True:
     read_page = readhtml_good(url)
-    currency = getCurrency(read_page, 'USD')
-    print(currency)
-    time.sleep(300)
+    for i in range(1,len(sys.argv)):
+        currency = get_currency(read_page, sys.argv[i])
+        print(sys.argv[i]," равен ", currency)
+    print('\n')
+    time.sleep(10)
