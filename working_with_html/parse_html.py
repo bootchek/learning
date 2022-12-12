@@ -22,13 +22,18 @@ class HtmlReader:
         #     output_file.write(r.text)
 
 
+    def getCurrency(self, html, currency_string):
+        soup = BeautifulSoup(html, 'html.parser')
+        tags = soup.find_all('div')
+        for tag in tags:
+            if 'class' in tag.attrs:
+                if tag['class'] == ["table-wrapper"]:
+                    for currency in tag.find_all('tr'):
+                        if currency.contents[3].string == currency_string:
+                            return currency.contents[9].string
+
 url = 'https://www.cbr.ru/currency_base/daily/'
-# html_reader = HtmlReader
-# html_reader.HtmlReaderGood(html_reader, url, 'copy_page')
-html = HtmlReader.HtmlReaderGood(HtmlReader, url)
-# print(html)
-soup = BeautifulSoup(HtmlReader.HtmlReaderGood(HtmlReader, url), 'html.parser')
-# all_currencies = soup.find_all('tr')
-all_currencies = soup('tr')
-for currency in all_currencies:
-    print(currency.t)
+page = HtmlReader
+read_page = page.HtmlReaderGood(page, url)
+currency = page.getCurrency(page, read_page, 'EUR')
+print(currency)
