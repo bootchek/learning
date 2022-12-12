@@ -1,6 +1,7 @@
 import urllib.request
 import ssl
 import requests
+from bs4 import BeautifulSoup
 
 class HtmlReader:
     def HtmlReaderBad(self, url, output_filename):
@@ -15,12 +16,19 @@ class HtmlReader:
         fhand.close()
 
 
-    def HtmlReaderGood(self, url, output_filename):
-        r = requests.get(url)
-        with open(output_filename+'.html', 'w') as output_file:
-            output_file.write(r.text)
+    def HtmlReaderGood(self, url):
+        return requests.get(url).text
+        # with open(output_filename+'.html', 'w') as output_file:
+        #     output_file.write(r.text)
 
 
 url = 'https://www.cbr.ru/currency_base/daily/'
-html_reader = HtmlReader
-html_reader.HtmlReaderGood(html_reader, url, 'copy_page')
+# html_reader = HtmlReader
+# html_reader.HtmlReaderGood(html_reader, url, 'copy_page')
+html = HtmlReader.HtmlReaderGood(HtmlReader, url)
+# print(html)
+soup = BeautifulSoup(HtmlReader.HtmlReaderGood(HtmlReader, url), 'html.parser')
+# all_currencies = soup.find_all('tr')
+all_currencies = soup('tr')
+for currency in all_currencies:
+    print(currency.t)
