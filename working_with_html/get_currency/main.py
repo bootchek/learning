@@ -6,20 +6,17 @@ import json_creator
 
 url = 'https://www.cbr.ru/currency_base/daily/'
 input_file = open(sys.argv[1], "r")
-codes = []
-for line in input_file:
-    codes.append(line.rstrip("\n"))
+codes = input_file.read().splitlines()
 input_file.close()
 
 while True:
     json_list = []
     read_page = get_data.readhtml_good(url)
-    for code in codes:
-        quantity = get_data.get_currency_parametr_from_column(read_page, code, 5)
-        name = get_data.get_currency_parametr_from_column(read_page, code, 7)
-        value = get_data.get_currency_parametr_from_column(read_page, code, 9)
-        json_list.append(Currency(code, quantity, name, value))
-        print(code, " равен ", value)
+    data_from_page = get_data.get_currency_data(read_page)
+    for currency in data_from_page:
+        if currency.code in codes:
+            json_list.append(currency)
+            print(currency.code, " равен ", currency.value)
     output_json = json_creator.create_json_from(json_list)
     output_file = open(sys.argv[2], 'w')
     output_file.write(output_json)
