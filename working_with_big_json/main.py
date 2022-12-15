@@ -2,10 +2,9 @@ import sys
 import json
 
 f = open(sys.argv[1])
-
 k, n, i = sys.argv[2], 0, 0
 data = json.load(f)
-while i < len(data) - 1:
+while i < len(data):
     json_list = []
     for i in range(i, i + int(k)):
         if i == len(data):
