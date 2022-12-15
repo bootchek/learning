@@ -1,4 +1,4 @@
-# working-with-json-data
 Learning basics of the Git
 
-Oleg, SDR!
+Чтобы тебе за раз установить нужные для проекта библиотеки, надо скачать файл requirements.txt
+и ввести команду python3 -m pip install -r requirements.txt

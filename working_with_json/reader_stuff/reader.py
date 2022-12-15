@@ -1,8 +1,7 @@
 import json
-import sys
 import os
-from reader_stuff.city import City
-from reader_stuff.street import Street
+from working_with_json.reader_stuff.city import City
+from working_with_json.reader_stuff.street import Street
 
 
 def read_json_data(input_filename: str) -> dict:

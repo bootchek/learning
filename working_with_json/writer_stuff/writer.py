@@ -1,8 +1,8 @@
 import json
 from json import JSONEncoder
-from writer_stuff.street import Street
-from writer_stuff.city import City
-from writer_stuff.country import Country
+from working_with_json.writer_stuff.street import Street
+from working_with_json.writer_stuff.city import City
+from working_with_json.writer_stuff.country import Country
 
 class Mapper(JSONEncoder):
     def default(self, o):
