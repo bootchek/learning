@@ -13,7 +13,18 @@ temp = tempfile.NamedTemporaryFile()
 with tempfile.TemporaryFile() as tmp:
     tmp.write(bytes(requests.get(url).text, 'utf-8'))
     tmp.seek(0)
-    print(tmp.read())
+    data = json.loads(tmp.read())
+
+print(data[0])
+# f = tempfile.TemporaryFile(mode='w+t')
+# try:
+#     f.writelines(['first\n', 'second\n'])
+#     f.seek(0)
+#
+#     for line in f:
+#         print line.rstrip()
+# finally:
+#     f.close()
 
 
 
