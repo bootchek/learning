@@ -13,15 +13,15 @@ with tempfile.TemporaryDirectory() as tmpdirname: #создаём временн
     #открываем файл и работаем с ним
     f = open(tmpdirname+'/local.json', 'r')
     json_data = json.load(f)
-    k, n, i = sys.argv[2], 0, 0
+    number_of_objects, number_of_files, i = sys.argv[2], 0, 0
     while i < len(json_data):
         json_list = []
-        for i in range(i, i + int(k)):
+        for i in range(i, i + int(number_of_objects)):
             if i == len(json_data):
                 break
             else:
                 json_list.append(json_data[i])
-        n += 1
+        number_of_files += 1
         i += 1
-        with open(sys.argv[3]+"file_" + str(n) + ".json", "w") as outfile:
+        with open(sys.argv[3]+"file_" + str(number_of_files) + ".json", "w") as outfile:
             json.dump(json_list, outfile, indent=2)
