@@ -6,7 +6,7 @@ import tempfile
 # https://raw.githubusercontent.com/jokecamp/FootballData/master/World%20Cups/all-world-cup-players.json
 
 with tempfile.TemporaryDirectory() as tmpdirname: #создаём временную директорию; она существует, пока мы в блоке with
-    # сохраняем файл в этой директории
+    # сохраняем файл в этой директорииbpvtyfsksdf
     url_data = requests.get(sys.argv[1])
     with open(tmpdirname+'/local.json', 'wb') as file:
         file.write(url_data.content)
