@@ -15,12 +15,11 @@ with tempfile.TemporaryDirectory() as tmpdirname:  # создаём времен
     # #открываем файл и работаем с ним
     f = open(tmpdirname + '/local.json', 'r')
     json_data = json.load(f)
+    f.close()
+    attributes = json_data[0].keys()
     with open('local.csv', 'w', newline='') as f:
         writer = csv.writer(f)
-        writer.writerow(
-            ["Competition", "Year", "Team", "Number", "Position", "FullName", "Club", "ClubCountry", "DateOfBirth",
-             "IsCaptain"])
+        writer.writerow(json_data[0].keys())
         for object in json_data:
-            writer.writerow(
-                [object["Competition"], object["Year"], object["Team"], object["Number"], object["Position"],
-                 object["FullName"], object["Club"], object["ClubCountry"], object["DateOfBirth"], object["IsCaptain"]])
+            writer.writerow([object[attribute] for attribute in attributes])
+    f.close()
