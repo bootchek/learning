@@ -21,5 +21,5 @@ with tempfile.TemporaryDirectory() as tmpdirname:  # создаём времен
         writer = csv.writer(f)
         writer.writerow(json_data[0].keys())
         for object in json_data:
-            writer.writerow([object[attribute] for attribute in attributes])
+            writer.writerow([object[attribute] for attribute in attributes]) #вот тут я использую list comprehension
     f.close()
