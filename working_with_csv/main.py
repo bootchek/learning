@@ -38,7 +38,7 @@ def split_file_if_exists(path, number_of_pieces):
         try:
             file_size = os.stat(path + 'local.csv').st_size
             split = Split(path + 'local.csv', path)
-            split.bysize(size=round(file_size / number_of_pieces), newline=False, includeheader=False)
+            split.bysize(size=round(file_size / int(number_of_pieces)), newline=False, includeheader=False)
             os.remove(path + 'local.csv')
             print(f"The file has been splitted into {number_of_pieces} pieces and removed.")
             # return None
@@ -47,8 +47,8 @@ def split_file_if_exists(path, number_of_pieces):
         time.sleep(3)
 
 
-first_function = threading.Thread(target=get_json_and_save_to_csv, args=(url, "/Users/danilbuslaev/Desktop/"))
-second_function = threading.Thread(target=split_file_if_exists, args=("/Users/danilbuslaev/Desktop/", 4))
+first_function = threading.Thread(target=get_json_and_save_to_csv, args=(url, sys.argv[1]))
+second_function = threading.Thread(target=split_file_if_exists, args=(sys.argv[1], sys.argv[2]))
 # get_json_and_save_to_csv(url, "/Users/danilbuslaev/Desktop/")
 # split_file_if_exists("/Users/danilbuslaev/Desktop/", 4)
 first_function.start()
