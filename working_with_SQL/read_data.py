@@ -8,4 +8,4 @@ cur = con.cursor()  # "курсор" для отправки запросов и
 res = cur.execute("SELECT number, content, created FROM Note")
 notes_data = res.fetchall()
 for note in notes_data:
-    print(f"Note {note[0]} content: {note[1]}")
+    print(f"Note {note[0]} date: {note[2][:10]}, time:{note[2][10:]}, content: {note[1]}")
