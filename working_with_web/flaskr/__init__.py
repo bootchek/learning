@@ -6,32 +6,34 @@ app = Flask(__name__)
 
 
 def get_db_connection():
-    conn = sqlite3.connect("/Users/danilbuslaev/Desktop/test_db")
+    conn = sqlite3.connect("/home/budulay/test_db")
+    # conn = sqlite3.connect("/Users/danilbuslaev/Desktop/test_db")
     conn.row_factory = sqlite3.Row
     return conn
 
 
 @app.route("/")
-def hello_world():
+def show_linked_table():
     conn = get_db_connection()
     res = conn.execute("""SELECT number, adress
                             FROM flats
                             INNER JOIN buildings on buildings.id = flats.building_id;
                             """)
-    list_of_flats = res.fetchall()
-    table = tabulate(list_of_flats, tablefmt="html")
+    flats = res.fetchall()
+    header = ["Идентификатор квартиры", "Адрес"]
     conn.close()
-    return render_template('index.html', flats=list_of_flats)
+    return render_template('elements.html', elements=flats, header=header)
 
 
 @app.route('/flats/<number>')
 def flat(number):
     conn = get_db_connection()
-    res = conn.execute("""SELECT number FROM flats WHERE number = ?;
+    res = conn.execute("""SELECT id, building_id, number FROM flats WHERE number = ?;
                             """, (number,))
-    flat = res.fetchone()
+    flat = res.fetchall()
     conn.close()
-    return render_template('flat.html', number=flat)
+    header = ["Идентификатор квартиры", "Идентификатор здания", "Номер"]
+    return render_template('elements.html', elements=flat, header=header)
 
 
 @app.route('/flats/')
@@ -85,6 +87,7 @@ def addflat():
             msg = "Запись добавлена"
         except:
             conn.rollback()
+            msg = "Такая запись уже существует"
         finally:
             return render_template("result.html", msg=msg)
             conn.close()
@@ -109,10 +112,11 @@ def addbuilding():
             msg = "Запись добавлена"
         except:
             conn.rollback()
+            msg = "Такая запись уже существует"
         finally:
             return render_template("result.html", msg=msg)
             conn.close()
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='95.216.213.239')
