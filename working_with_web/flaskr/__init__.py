@@ -21,7 +21,7 @@ def hello_world():
     list_of_flats = res.fetchall()
     table = tabulate(list_of_flats, tablefmt="html")
     conn.close()
-    return render_template('index.html', flats = list_of_flats)
+    return render_template('index.html', flats=list_of_flats)
 
 
 @app.route('/flats/<number>')
@@ -32,6 +32,37 @@ def flat(number):
     flat = res.fetchone()
     conn.close()
     return render_template('flat.html', number=flat)
+
+
+@app.route('/flats/')
+def flats():
+    conn = get_db_connection()
+    res = conn.execute("""SELECT id, building_id, number FROM flats;""")
+    flats = res.fetchall()
+    conn.close()
+    header = ["Идентификатор квартиры", "Идентификатор здания", "Номер"]
+    return render_template('elements.html', elements=flats, header=header)
+
+
+@app.route('/buildings/')
+def buildings():
+    conn = get_db_connection()
+    res = conn.execute("""SELECT id, Adress FROM buildings;""")
+    buildings = res.fetchall()
+    conn.close()
+    header = ["Идентификатор здания", "Адрес здания"]
+    return render_template('elements.html', elements=buildings, header=header)
+
+
+@app.route('/buildings/<id>')
+def building(id):
+    conn = get_db_connection()
+    res = conn.execute("""SELECT id, Adress FROM buildings WHERE id = ?;
+                            """, (id,))
+    building = res.fetchall()
+    conn.close()
+    header = ["Идентификатор здания", "Адрес здания"]
+    return render_template('elements.html', elements=building, header=header)
 
 
 if __name__ == '__main__':

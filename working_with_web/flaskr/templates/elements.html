@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>{% block title %} {{ element }} {% endblock %}</h1>
+<table>
+    <thead>
+    <tr>
+        <th>{{ header[0] }}</th>
+        <th>{{ header[1] }}</th>
+        <th>{{ header[2] }}</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for row in elements %}
+    <tr>
+        <td>{{ row[0] }}</td>
+        <td>{{ row[1] }}</td>
+        <td>{{ row[2] }}</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
