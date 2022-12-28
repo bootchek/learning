@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block content %}
+<!--<h1>{% block title %} {{ element }} {% endblock %}</h1>-->
+<form action="{{ url_for('addflat') }}" method="POST">
+    <h3>Информация о квартире</h3>
+    Идентификатор<br>
+    <input type="number" name="id"/></br>
+
+    Идентификатор здания<br>
+    <input type="number" name="building_id"/><br>
+
+    Номер квартиры<br>
+    <input type="number" name="number"/><br>
+    <br><input type="submit" value="submit"/><br>
+</form>
+{% endblock %}

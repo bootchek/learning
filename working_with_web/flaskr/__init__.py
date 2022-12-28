@@ -1,4 +1,4 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, request
 import sqlite3
 from tabulate import tabulate
 
@@ -63,6 +63,55 @@ def building(id):
     conn.close()
     header = ["Идентификатор здания", "Адрес здания"]
     return render_template('elements.html', elements=building, header=header)
+
+
+@app.route('/flats/new')
+def new_flat():
+    return render_template('new_flat.html')
+
+
+@app.route('/addflat', methods=['POST', 'GET'])
+def addflat():
+    if request.method == 'POST':
+        conn = get_db_connection()
+        try:
+            id = request.form['id']
+            building_id = request.form['building_id']
+            number = request.form['number']
+
+            conn.execute("""INSERT INTO flats (id, building_id, number)
+                VALUES(?, ?, ?)""", (id, building_id, number))
+            conn.commit()
+            msg = "Запись добавлена"
+        except:
+            conn.rollback()
+        finally:
+            return render_template("result.html", msg=msg)
+            conn.close()
+
+
+@app.route('/buildings/new')
+def new_building():
+    return render_template('new_building.html')
+
+
+@app.route('/addbuilding', methods=['POST', 'GET'])
+def addbuilding():
+    if request.method == 'POST':
+        conn = get_db_connection()
+        try:
+            id = request.form['id']
+            Adress = request.form['Adress']
+
+            conn.execute("""INSERT INTO buildings (id, Adress)
+                VALUES(?, ?)""", (id, Adress))
+            conn.commit()
+            msg = "Запись добавлена"
+        except:
+            conn.rollback()
+        finally:
+            return render_template("result.html", msg=msg)
+            conn.close()
 
 
 if __name__ == '__main__':
