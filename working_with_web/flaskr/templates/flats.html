@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>{% block title %} Квартиры {% endblock %}</h1>
+<h2><a href={{url_for('new_flat')}}> Добавить квартиру</a></h2>
+<table>
+    <thead>
+    <tr>
+        <th>{{ header[0] }}</th>
+        <th>{{ header[1] }}</th>
+        <th>{{ header[2] }}</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for row in elements %}
+    <tr>
+        <td>{{ row[0] }}</td>
+        <td><a href={{url_for('building', id=row[1])}}> {{ row[1] }}</a></td>
+        <td>{{ row[2] }}</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

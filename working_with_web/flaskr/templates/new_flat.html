@@ -4,11 +4,11 @@
 <!--<h1>{% block title %} {{ element }} {% endblock %}</h1>-->
 <form action="{{ url_for('addflat') }}" method="POST">
     <h3>Информация о квартире</h3>
-    Идентификатор<br>
-    <input type="number" name="id"/></br>
-
-    Идентификатор здания<br>
-    <input type="number" name="building_id"/><br>
+    Выбрать адрес здания<br><SELECT name="building_adress">
+    {% for adress in adresses %}
+    <OPTION value='{{ adress[0] }}'>{{adress[0]}}</option>
+    {% endfor %}
+</SELECT><br>
 
     Номер квартиры<br>
     <input type="number" name="number"/><br>
