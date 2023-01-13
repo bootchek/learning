@@ -1,9 +1,10 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, flash, redirect, url_for
 import sqlite3
 from tabulate import tabulate
 import logging
 
 app = Flask(__name__)
+app.secret_key = 'hello'
 
 
 def get_db_connection():
@@ -92,14 +93,15 @@ def addflat():
             conn.execute("""INSERT INTO flats (building_id, number)
                 VALUES(?, ?)""", (building_id[0][0], number))
             conn.commit()
-            msg = "Запись добавлена"
+            flash('Квартира успешно добавлена')
+            conn.close()
+            return redirect(url_for('flats'))
         except:
             conn.rollback()
-            msg = "Такая запись уже существует"
+            flash('Такая запись уже существует')
             logging.exception('')
-        finally:
-            return render_template("result.html", msg=msg)
             conn.close()
+            return redirect(url_for('new_flat'))
 
 
 @app.route('/buildings/new')
@@ -111,69 +113,41 @@ def new_building():
 def addbuilding():
     if request.method == 'POST':
         conn = get_db_connection()
-        try:
-            Adress = request.form['Adress']
+        Adress = request.form['Adress']
 
-            conn.execute("""INSERT INTO buildings (Adress)
-                VALUES (?)""", (Adress,))
-            conn.commit()
-            msg = "Запись добавлена"
-        except:
-            conn.rollback()
-            msg = "Такая запись уже существует"
-        finally:
-            return render_template("result.html", msg=msg)
-            conn.close()
-
-
-@app.route('/buildings/delete')
-def delete_building():
-    conn = get_db_connection()
-    res = conn.execute("""SELECT Adress FROM buildings""")
-    adresses = res.fetchall()
-    conn.close()
-    return render_template('delete_building.html', adresses=adresses)
+        conn.execute("""INSERT INTO buildings (Adress)
+            VALUES (?)""", (Adress,))
+        conn.commit()
+        conn.close()
+        flash('Здание успешно добавлено')
+        conn.close()
+        return redirect(url_for('buildings'))
 
 
 @app.route('/deletebuilding', methods=['POST', 'GET'])
 def deletebuilding():
     if request.method == 'POST':
         conn = get_db_connection()
-        try:
-            building_adress = request.form['building_adress']
-            res = conn.execute("""SELECT id FROM buildings WHERE Adress = ?;
-            """, (building_adress,))
-            building_id = res.fetchall()
-            conn.execute("""DELETE FROM buildings 
-                WHERE id = ?""", (building_id[0][0],))
-            conn.commit()
-            msg = "Запись удалена"
-        except:
-            conn.rollback()
-            msg = "Ошибка"
-            logging.exception('')
-        finally:
-            return render_template("result.html", msg=msg)
-            conn.close()
+        building_id = request.form['building_id']
+        conn.execute("""DELETE FROM buildings 
+            WHERE id = ?""", (building_id,))
+        conn.commit()
+        conn.close()
+        flash('Запись удалена')
+        return redirect(url_for('buildings'))
 
 
 @app.route('/deleteflat', methods=['POST', 'GET'])
 def deleteflat():
     if request.method == 'POST':
         conn = get_db_connection()
-        try:
-            flat_id = request.form['flat_id']
-            conn.execute("""DELETE FROM flats 
-                WHERE id = ?""", (flat_id,))
-            conn.commit()
-            msg = "Запись удалена"
-        except:
-            conn.rollback()
-            msg = "Ошибка"
-            logging.exception('')
-        finally:
-            return render_template("result.html", msg=msg)
-            conn.close()
+        flat_id = request.form['flat_id']
+        conn.execute("""DELETE FROM flats 
+            WHERE id = ?""", (flat_id,))
+        conn.commit()
+        conn.close()
+        flash('Запись удалена')
+        return redirect(url_for('flats'))
 
 
 if __name__ == '__main__':

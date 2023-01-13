@@ -10,17 +10,18 @@
             margin-left: 50px;
             text-decoration: none;
         }
+
     </style>
 </head>
 <body>
-    <nav>
-        <a href={{url_for('show_linked_table')}}> Главная </a>
-        <a href={{url_for('flats')}}> Квартиры</a>
-        <a href={{url_for('buildings')}}> Здания</a>
-    </nav>
-    <hr>
-    <div class="content">
-        {% block content %} {% endblock %}
-    </div>
+<nav>
+    <a href={{url_for('show_linked_table')}}> Главная </a>
+    <a href={{url_for('flats')}}> Квартиры</a>
+    <a href={{url_for('buildings')}}> Здания</a>
+</nav>
+<hr>
+<div class="content">
+    {% block content %} {% endblock %}
+</div>
 </body>
 </html>
