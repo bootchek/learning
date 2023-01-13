@@ -126,6 +126,56 @@ def addbuilding():
             conn.close()
 
 
+@app.route('/buildings/delete')
+def delete_building():
+    conn = get_db_connection()
+    res = conn.execute("""SELECT Adress FROM buildings""")
+    adresses = res.fetchall()
+    conn.close()
+    return render_template('delete_building.html', adresses=adresses)
+
+
+@app.route('/deletebuilding', methods=['POST', 'GET'])
+def deletebuilding():
+    if request.method == 'POST':
+        conn = get_db_connection()
+        try:
+            building_adress = request.form['building_adress']
+            res = conn.execute("""SELECT id FROM buildings WHERE Adress = ?;
+            """, (building_adress,))
+            building_id = res.fetchall()
+            conn.execute("""DELETE FROM buildings 
+                WHERE id = ?""", (building_id[0][0],))
+            conn.commit()
+            msg = "Запись удалена"
+        except:
+            conn.rollback()
+            msg = "Ошибка"
+            logging.exception('')
+        finally:
+            return render_template("result.html", msg=msg)
+            conn.close()
+
+
+@app.route('/deleteflat', methods=['POST', 'GET'])
+def deleteflat():
+    if request.method == 'POST':
+        conn = get_db_connection()
+        try:
+            flat_id = request.form['flat_id']
+            conn.execute("""DELETE FROM flats 
+                WHERE id = ?""", (flat_id,))
+            conn.commit()
+            msg = "Запись удалена"
+        except:
+            conn.rollback()
+            msg = "Ошибка"
+            logging.exception('')
+        finally:
+            return render_template("result.html", msg=msg)
+            conn.close()
+
+
 if __name__ == '__main__':
     # app.run()
     app.run(host='95.216.213.239')

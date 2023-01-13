@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block content %}
+<!--<h1>{% block title %} {{ element }} {% endblock %}</h1>-->
+<form action="{{ url_for('deleteflat') }}" method="POST">
+    Выбрать адрес здания<br><SELECT name="building_adress">
+    {% for adress in adresses %}
+    <OPTION value='{{ adress[0] }}'>{{adress[0]}}</option>
+    {% endfor %}
+</SELECT><br>
+    Выбрать номер квартиры<br><SELECT name="flat_number">
+    {% for number in numbers %}
+    <OPTION value='{{ number[0] }}'>{{number[0]}}</option>
+    {% endfor %}
+</SELECT><br>
+    <br><input type="submit" value="Удалить"/><br>
+</form>
+{% endblock %}

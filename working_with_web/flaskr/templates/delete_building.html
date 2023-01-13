@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block content %}
+<!--<h1>{% block title %} {{ element }} {% endblock %}</h1>-->
+<form action="{{ url_for('deletebuilding') }}" method="POST">
+    Выбрать адрес здания<br><SELECT name="building_adress">
+    {% for adress in adresses %}
+    <OPTION value='{{ adress[0] }}'>{{adress[0]}}</option>
+    {% endfor %}
+</SELECT><br>
+    <br><input type="submit" value="Удалить"/><br>
+</form>
+{% endblock %}
