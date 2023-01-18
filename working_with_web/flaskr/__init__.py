@@ -8,9 +8,10 @@ app.secret_key = 'hello'
 
 
 def get_db_connection():
-    conn = sqlite3.connect("/home/budulay/test_db")
-    # conn = sqlite3.connect("/Users/danilbuslaev/Desktop/test_db")
-    # conn = sqlite3.connect("/Users/danilbuslaev/PycharmProjects/learning/test_db")
+    r = open('db_path', 'r')
+    db_path = r.read()
+    conn = sqlite3.connect(db_path)
+    conn.execute('PRAGMA foreign_keys = ON;')
     conn.row_factory = sqlite3.Row
     return conn
 
