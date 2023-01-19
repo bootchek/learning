@@ -4,12 +4,11 @@ from tabulate import tabulate
 import logging
 
 app = Flask(__name__)
-app.secret_key = 'hello'
+app.config.from_pyfile('config.py')
 
 
 def get_db_connection():
-    r = open('db_path', 'r')
-    db_path = r.read()
+    db_path = app.config['DB_PATH']
     conn = sqlite3.connect(db_path)
     conn.execute('PRAGMA foreign_keys = ON;')
     conn.row_factory = sqlite3.Row
@@ -152,5 +151,4 @@ def deleteflat():
 
 
 if __name__ == '__main__':
-    # app.run()
-    app.run(host='95.216.213.239')
+    app.run()
