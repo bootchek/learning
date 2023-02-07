@@ -21,14 +21,13 @@
     </tr>
     </thead>
     <tbody>
-    {% for row in elements %}
+    {% for building in elements %}
     <tr>
-        <td>{{ row[0] }}</td>
-        <td>{{ row[1] }}</td>
-        <td>{{ row[2] }}</td>
+        <td>{{ building[0] }}</td>
+        <td>{{ building[1] }}</td>
         <td>
             <form action="{{ url_for('deletebuilding') }}" method="POST">
-                <input id="building_id" name="building_id" type="hidden" value="{{ row[0] }}">
+                <input id="building_id" name="building_id" type="hidden" value="{{ building[0] }}">
                 <button type="submit">Удалить</button>
             </form>
         </td>
