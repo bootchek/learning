@@ -10,19 +10,11 @@ app.config.from_pyfile('config.py')
 db = SQLAlchemy(app)
 db.init_app(app)
 
-# with app.app_context():
-#     flats_table = db.Table('Flats', db.metadata, autoload=True, autoload_with=db.engine)
-#     buildings_table = db.Table('Buildings', db.metadata, autoload=True, autoload_with=db.engine)
 with app.app_context():
-    db.reflect()
+    flats_table = db.Table('Flats', db.metadata, autoload=True, autoload_with=db.engine)
+    buildings_table = db.Table('Buildings', db.metadata, autoload=True, autoload_with=db.engine)
 
-
-class Flats:
-    __table__ = db.metadata.tables["Flats"]
-
-
-class Buildings:
-    __table__ = db.metadata.tables['Buildings']
+    db.session.execute("PRAGMA foreign_keys = ON;")
 
 
 def get_db_connection():
@@ -34,84 +26,63 @@ def get_db_connection():
 
 @app.route("/")
 def show_linked_table():
-    conn = get_db_connection()
-    res = conn.execute("""SELECT number, adress
-                            FROM flats
-                            INNER JOIN buildings on buildings.id = flats.building_id;
-                            """)
-    flats = res.fetchall()
+    results = db.session.execute(
+        db.select(flats_table.c.number, buildings_table.c.Adress).join_from(flats_table, buildings_table))
     header = ["Номер квартиры", "Адрес"]
-    conn.close()
-    return render_template('linked_table.html', elements=flats, header=header)
+    return render_template('linked_table.html', elements=results, header=header)
 
 
 @app.route('/flats/<number>')
 def flat(number):
-    result = db.session.execute(db.select(Flats).where(Flats.number == number)).scalars()
-    # result=db.get_or_404(flats_table, number)
+    result = db.session.execute(db.select(flats_table).where(flats_table.c.number == number))
     header = ["Идентификатор квартиры", "Идентификатор здания", "Номер"]
-    return render_template('flats.html', elements=[result.id, result.building_id, result.number], header=header)
+    return render_template('flats.html', elements=result, header=header)
 
 
 @app.route('/flats/')
 def flats():
-    # results = db.session.query(flats_table).all()
-    results = db.session.execute(db.select(Flats).order_by(Flats.id)).scalars()
-    elements = []
-    for flat in results:
-        elements.append([flat.id, flat.building_id, flat.number])
+    results = db.session.execute(db.select(flats_table))
     header = ["Идентификатор квартиры", "Идентификатор здания", "Номер"]
-    return render_template('flats.html', elements=elements, header=header)
+    return render_template('flats.html', elements=results, header=header)
 
 
 @app.route('/buildings/')
 def buildings():
-    results = db.session.execute(db.select(Buildings).order_by(Buildings.id)).scalars()
-    elements = []
-    for building in results:
-        elements.append([building.id, building.Adress])
+    results = db.session.execute(db.select(buildings_table))
     header = ["Идентификатор здания", "Адрес здания"]
-    return render_template('buildings.html', elements=elements, header=header)
+    return render_template('buildings.html', elements=results, header=header)
 
 
 @app.route('/buildings/<id>')
 def building(id):
-    result = db.get_or_404(Buildings, id)
+    result = db.session.execute(db.select(buildings_table).where(buildings_table.c.id == id))
     header = ["Идентификатор здания", "Адрес здания"]
-    return render_template('buildings.html', elements=[result.id, result.Adress], header=header)
+    return render_template('buildings.html', elements=result, header=header)
 
 
 @app.route('/flats/new')
 def new_flat():
-    conn = get_db_connection()
-    res = conn.execute("""SELECT Adress FROM buildings""")
-    adresses = res.fetchall()
-    conn.close()
+    adresses = db.session.execute(db.select(buildings_table.c.Adress))
     return render_template('new_flat.html', adresses=adresses)
 
 
 @app.route('/addflat', methods=['POST', 'GET'])
 def addflat():
     if request.method == 'POST':
-        conn = get_db_connection()
         try:
             building_adress = request.form['building_adress']
             number = request.form['number']
 
-            res = conn.execute("""SELECT id FROM buildings WHERE Adress = ?;
-            """, (building_adress,))
-            building_id = res.fetchall()
-            conn.execute("""INSERT INTO flats (building_id, number)
-                VALUES(?, ?)""", (building_id[0][0], number))
-            conn.commit()
+            building_id = db.session.execute(
+                db.select(buildings_table.c.id).where(buildings_table.c.Adress == building_adress)).scalar()
+            db.session.execute(db.insert(flats_table).values(building_id=building_id, number=number))
+            db.session.commit()
             flash('Квартира успешно добавлена')
-            conn.close()
+
             return redirect(url_for('flats'))
         except:
-            conn.rollback()
             flash('Такая запись уже существует')
             logging.exception('')
-            conn.close()
             return redirect(url_for('new_flat'))
 
 
@@ -123,27 +94,22 @@ def new_building():
 @app.route('/addbuilding', methods=['POST', 'GET'])
 def addbuilding():
     if request.method == 'POST':
-        conn = get_db_connection()
-        Adress = request.form['Adress']
+        adress = request.form['Adress']
+        db.session.execute(db.insert(buildings_table).values(Adress=adress))
+        db.session.commit()
 
-        conn.execute("""INSERT INTO buildings (Adress)
-            VALUES (?)""", (Adress,))
-        conn.commit()
-        conn.close()
         flash('Здание успешно добавлено')
-        conn.close()
+
         return redirect(url_for('buildings'))
 
 
 @app.route('/deletebuilding', methods=['POST', 'GET'])
 def deletebuilding():
     if request.method == 'POST':
-        conn = get_db_connection()
         building_id = request.form['building_id']
-        conn.execute("""DELETE FROM buildings
-            WHERE id = ?""", (building_id,))
-        conn.commit()
-        conn.close()
+        db.session.execute(db.delete(buildings_table).where(buildings_table.c.id == building_id))
+        db.session.commit()
+
         flash('Запись удалена')
         return redirect(url_for('buildings'))
 
@@ -151,12 +117,10 @@ def deletebuilding():
 @app.route('/deleteflat', methods=['POST', 'GET'])
 def deleteflat():
     if request.method == 'POST':
-        conn = get_db_connection()
         flat_id = request.form['flat_id']
-        conn.execute("""DELETE FROM flats
-            WHERE id = ?""", (flat_id,))
-        conn.commit()
-        conn.close()
+        db.session.execute(db.delete(flats_table).where(flats_table.c.id == flat_id))
+        db.session.commit()
+
         flash('Запись удалена')
         return redirect(url_for('flats'))
 
