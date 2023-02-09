@@ -10,11 +10,20 @@ app.config.from_pyfile('config.py')
 db = SQLAlchemy(app)
 db.init_app(app)
 
-with app.app_context():
-    flats_table = db.Table('Flats', db.metadata, autoload=True, autoload_with=db.engine)
-    buildings_table = db.Table('Buildings', db.metadata, autoload=True, autoload_with=db.engine)
 
-    db.session.execute("PRAGMA foreign_keys = ON;")
+class Buildings(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    Adress = db.Column(db.String(60))
+
+
+class Flats(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    building_id = db.Column(db.Integer, db.ForeignKey(Buildings.id))
+    number = db.Column(db.Integer)
+
+
+with app.app_context():
+    db.create_all()
 
 
 def get_db_connection():
@@ -27,42 +36,54 @@ def get_db_connection():
 @app.route("/")
 def show_linked_table():
     results = db.session.execute(
-        db.select(flats_table.c.number, buildings_table.c.Adress).join_from(flats_table, buildings_table))
+        db.select(Flats.number, Buildings.Adress).join_from(Flats, Buildings)).all()
     header = ["Номер квартиры", "Адрес"]
     return render_template('linked_table.html', elements=results, header=header)
 
 
 @app.route('/flats/<number>')
 def flat(number):
-    result = db.session.execute(db.select(flats_table).where(flats_table.c.number == number))
+    result_ORM_obj = db.session.execute(db.select(Flats).where(Flats.number == number)).scalars().all()
+    result_lst_obj = []
+    for row in result_ORM_obj:
+        result_lst_obj.append((row.id, row.building_id, row.number))
     header = ["Идентификатор квартиры", "Идентификатор здания", "Номер"]
-    return render_template('flats.html', elements=result, header=header)
+    return render_template('flats.html', elements=result_lst_obj, header=header)
 
 
 @app.route('/flats/')
 def flats():
-    results = db.session.execute(db.select(flats_table))
+    result_ORM_obj = db.session.execute(db.select(Flats)).scalars().all()
+    result_lst_obj = []
+    for row in result_ORM_obj:
+        result_lst_obj.append((row.id, row.building_id, row.number))
     header = ["Идентификатор квартиры", "Идентификатор здания", "Номер"]
-    return render_template('flats.html', elements=results, header=header)
+    return render_template('flats.html', elements=result_lst_obj, header=header)
 
 
 @app.route('/buildings/')
 def buildings():
-    results = db.session.execute(db.select(buildings_table))
+    result_ORM_obj = db.session.execute(db.select(Buildings)).scalars().all()
+    result_lst_obj = []
+    for row in result_ORM_obj:
+        result_lst_obj.append((row.id, row.Adress))
     header = ["Идентификатор здания", "Адрес здания"]
-    return render_template('buildings.html', elements=results, header=header)
+    return render_template('buildings.html', elements=result_lst_obj, header=header)
 
 
 @app.route('/buildings/<id>')
 def building(id):
-    result = db.session.execute(db.select(buildings_table).where(buildings_table.c.id == id))
+    result_ORM_obj = db.session.execute(db.select(Buildings).where(Buildings.id == id)).scalars().all()
+    result_lst_obj = []
+    for row in result_ORM_obj:
+        result_lst_obj.append((row.id, row.Adress))
     header = ["Идентификатор здания", "Адрес здания"]
-    return render_template('buildings.html', elements=result, header=header)
+    return render_template('buildings.html', elements=result_lst_obj, header=header)
 
 
 @app.route('/flats/new')
 def new_flat():
-    adresses = db.session.execute(db.select(buildings_table.c.Adress))
+    adresses = db.session.execute(db.select(Buildings.Adress)).all()
     return render_template('new_flat.html', adresses=adresses)
 
 
@@ -74,8 +95,10 @@ def addflat():
             number = request.form['number']
 
             building_id = db.session.execute(
-                db.select(buildings_table.c.id).where(buildings_table.c.Adress == building_adress)).scalar()
-            db.session.execute(db.insert(flats_table).values(building_id=building_id, number=number))
+                db.select(Buildings.id).where(Buildings.Adress == building_adress)).scalar()
+
+            flat = Flats(building_id=building_id, number=number)
+            db.session.add(flat)
             db.session.commit()
             flash('Квартира успешно добавлена')
 
@@ -95,7 +118,10 @@ def new_building():
 def addbuilding():
     if request.method == 'POST':
         adress = request.form['Adress']
-        db.session.execute(db.insert(buildings_table).values(Adress=adress))
+
+        building = Buildings(Adress=adress)
+
+        db.session.add(building)
         db.session.commit()
 
         flash('Здание успешно добавлено')
@@ -107,7 +133,10 @@ def addbuilding():
 def deletebuilding():
     if request.method == 'POST':
         building_id = request.form['building_id']
-        db.session.execute(db.delete(buildings_table).where(buildings_table.c.id == building_id))
+
+        building = db.session.execute(db.select(Buildings).filter_by(id=building_id)).scalars().one()
+
+        db.session.delete(building)
         db.session.commit()
 
         flash('Запись удалена')
@@ -118,7 +147,10 @@ def deletebuilding():
 def deleteflat():
     if request.method == 'POST':
         flat_id = request.form['flat_id']
-        db.session.execute(db.delete(flats_table).where(flats_table.c.id == flat_id))
+
+        flat = db.session.execute(db.select(Flats).filter_by(id=flat_id)).scalars().one()
+
+        db.session.delete(flat)
         db.session.commit()
 
         flash('Запись удалена')
