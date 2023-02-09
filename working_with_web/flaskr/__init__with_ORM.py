@@ -43,42 +43,31 @@ def show_linked_table():
 
 @app.route('/flats/<number>')
 def flat(number):
-    result_ORM_obj = db.session.execute(db.select(Flats).where(Flats.number == number)).scalars().all()
-    result_lst_obj = []
-    for row in result_ORM_obj:
-        result_lst_obj.append((row.id, row.building_id, row.number))
+    result = db.session.execute(
+        db.select(Flats.id, Flats.building_id, Flats.number).where(Flats.number == number)).all()
     header = ["Идентификатор квартиры", "Идентификатор здания", "Номер"]
-    return render_template('flats.html', elements=result_lst_obj, header=header)
+    return render_template('flats.html', elements=result, header=header)
 
 
 @app.route('/flats/')
 def flats():
-    result_ORM_obj = db.session.execute(db.select(Flats)).scalars().all()
-    result_lst_obj = []
-    for row in result_ORM_obj:
-        result_lst_obj.append((row.id, row.building_id, row.number))
+    result = db.session.execute(db.select(Flats.id, Flats.building_id, Flats.number)).all()
     header = ["Идентификатор квартиры", "Идентификатор здания", "Номер"]
-    return render_template('flats.html', elements=result_lst_obj, header=header)
+    return render_template('flats.html', elements=result, header=header)
 
 
 @app.route('/buildings/')
 def buildings():
-    result_ORM_obj = db.session.execute(db.select(Buildings)).scalars().all()
-    result_lst_obj = []
-    for row in result_ORM_obj:
-        result_lst_obj.append((row.id, row.Adress))
+    result = db.session.execute(db.select(Buildings.id, Buildings.Adress)).all()
     header = ["Идентификатор здания", "Адрес здания"]
-    return render_template('buildings.html', elements=result_lst_obj, header=header)
+    return render_template('buildings.html', elements=result, header=header)
 
 
 @app.route('/buildings/<id>')
 def building(id):
-    result_ORM_obj = db.session.execute(db.select(Buildings).where(Buildings.id == id)).scalars().all()
-    result_lst_obj = []
-    for row in result_ORM_obj:
-        result_lst_obj.append((row.id, row.Adress))
+    result = db.session.execute(db.select(Buildings.id, Buildings.Adress).where(Buildings.id == id)).all()
     header = ["Идентификатор здания", "Адрес здания"]
-    return render_template('buildings.html', elements=result_lst_obj, header=header)
+    return render_template('buildings.html', elements=result, header=header)
 
 
 @app.route('/flats/new')
